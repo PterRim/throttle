@@ -1,0 +1,16 @@
+{
+  "name": "throttle",
+  "module": "index.ts",
+  "type": "module",
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "generic-handler": "^0.3.13",
+    "ppropagator": "0.3.1",
+    "sando-layer": "^0.1.6"
+  }
+}
