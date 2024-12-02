@@ -9,7 +9,6 @@ import { randomUUIDv7 } from "bun";
 const get_new_id = reference_store()
 const get_new_relative_time = reference_store()
 interface traced_timestamp {
-    id: string;
     timestamp: number;
     fresh: boolean;
 }
@@ -18,7 +17,7 @@ interface traced_timestamp {
 
 
 export function construct_traced_timestamp(timestamp: number): traced_timestamp {
-    return { id: randomUUIDv7(), timestamp, fresh: true }
+    return {  timestamp, fresh: true }
 }
 
 export const timestamp_layer = make_annotation_layer("time_stamp", (get_name: () => string,
@@ -26,7 +25,7 @@ export const timestamp_layer = make_annotation_layer("time_stamp", (get_name: ()
                                                                     get_value: (object: any) => any,
                                                                     is_equal: (a: any, b: any) => boolean) => {
     function get_default_value(): traced_timestamp {
-        return { id:  randomUUIDv7(), timestamp: 0, fresh: false }
+        return { timestamp: 0, fresh: false }
     }
 
     function get_procedure(name: string, arity: number): any | undefined {
