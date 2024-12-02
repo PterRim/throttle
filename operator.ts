@@ -90,11 +90,3 @@ export const or = (a: Node, b: Node) => {
     return output;
 }
 
-export const bind = (rA: Effect, rB: Effect) => {
-    return (a: Node, b: Node) => {
-        return construct_relationship("bind", () => {
-            rA(a, b);
-            rB(b, a);
-        });
-    }
-}

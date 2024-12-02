@@ -1,7 +1,7 @@
 
 import { reference_store } from "ppropogator/Helper/Helper";
 import { add_cell_content, cell_strongest, cell_strongest_base_value, cell_strongest_value, construct_cell, type Cell } from "ppropogator/Cell/Cell";
-import { compound_propagator, construct_propagator, primitive_propagator, type Propagator } from "ppropogator/Propagator/Propagator";
+import { compound_propagator, constraint_propagator, construct_propagator, primitive_propagator, type Propagator } from "ppropogator/Propagator/Propagator";
 import { set_immediate_execute } from "ppropogator/Shared/Reactivity/Scheduler";
 import { annotate_now, stale } from "./traced_timestamp";
 import { construct_effect_propagator as construct_effect_propagator  } from "./reactive_propagator";
@@ -25,8 +25,9 @@ export type Effect = (...nodes: Node[]) => Propagator
 export function construct_effect(name: string, f: (...o: LayeredObject[]) => any): Effect{
     // operator is propagators but it returned a cell
     return (...nodes: Node[]) => {
-        const output = nodes[0];
-        const inputs = nodes.slice(1);
+        const last_index = nodes.length - 1
+        const output = nodes[last_index];
+        const inputs = nodes.slice(0, last_index );
         return construct_effect_propagator(name, f)(inputs, output);
     }
 }
@@ -34,14 +35,13 @@ export function construct_effect(name: string, f: (...o: LayeredObject[]) => any
 // Relationship is multi-directional, you can say it is like behavior, but it is not exactly the same
 export type Relationship = (...nodes: Node[]) => Propagator
 
-export function construct_relationship(name: string, f: (...a: any[]) => any): Relationship{
-    return (...inputs: Cell[]) => {
+export function construct_relationship(name: string, f: (...inputs: any[]) => any): Relationship{
+    return (...inputs: Node[]) => {
 
-        return compound_propagator(
-            inputs, 
+        return  constraint_propagator(
             inputs, 
             () => {
-                f(); 
+                f(...inputs); 
                 // just for test
                 return construct_reactor();
             }, 
@@ -52,7 +52,7 @@ export function construct_relationship(name: string, f: (...a: any[]) => any): R
 
 export function connect(a: Node, b: Node, behavior: Behavior){
     // the behavior is a propagator
-    return behavior(b, a);
+    return behavior(a, b);
 }
 
 export function broadcast(a: Node, bs: Node[], behavior: Behavior){
@@ -74,35 +74,3 @@ export function update(a: Node, v: any){
 
 
 export const set_immediate_execution = () => set_immediate_execute(true);
-
-// const _add = (a: number, b: number) => a + b;
-
-// // TODO: relationship bi-directional
-// const add = construct_effect("add",  _add);
-
-// const a = construct_node("a");
-// const b = construct_node("b");
-
-
-// const c = add(a, b)
-
-// update(a, 2);
-// update(b, 3);
-
-// console.log(cell_strongest_base_value(c));
-
-// setTimeout(() => {
-//     update(a, 8);
-//     console.log(cell_strongest_base_value(c));
-// }, 1)
-
-
-
-
-// console.log(cell_strongest_base_value(c));
-
-// update_time(a, 8, 3);
-// update_time(b, 2, 3);
-
-
-// console.log(cell_strongest_base_value(c));
