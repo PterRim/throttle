@@ -11,7 +11,7 @@ import type { LayeredObject } from "sando-layer/Basic/LayeredObject";
 const new_reference_name = reference_store();
 
 
-type Node = Cell // or signal in other reactive system
+export type Node = Cell // or signal in other reactive system
 
 export function construct_node(name: string){
     return construct_cell(name + new_reference_name());
@@ -20,7 +20,7 @@ export function construct_node(name: string){
 export type Behavior = Effect | Relationship
 
 // effect is mono-directional , which is analogously to Event in conventional reactive system
-type Effect = (...nodes: Node[]) => Propagator 
+export type Effect = (...nodes: Node[]) => Propagator 
 
 export function construct_effect(name: string, f: (...o: LayeredObject[]) => any): Effect{
     // operator is propagators but it returned a cell
@@ -32,7 +32,7 @@ export function construct_effect(name: string, f: (...o: LayeredObject[]) => any
 }
 
 // Relationship is multi-directional, you can say it is like behavior, but it is not exactly the same
-type Relationship = (...nodes: Node[]) => Propagator
+export type Relationship = (...nodes: Node[]) => Propagator
 
 export function construct_relationship(name: string, f: (...a: any[]) => any): Relationship{
     return (...inputs: Cell[]) => {

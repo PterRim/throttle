@@ -4,7 +4,7 @@ import { subscribe, tap } from "ppropogator/Shared/Reactivity/Reactor";
 import { cell_strongest } from "ppropogator/Cell/Cell";
 import { pipe } from "fp-ts/lib/function";
 import { combine_latest } from "ppropogator/Shared/Reactivity/Reactor";
-import { is_no_compute } from "./no_compute";
+import {  is_no_compute } from "./no_compute";
 import { map, filter } from "ppropogator/Shared/Reactivity/Reactor";
 import { event_procedure } from "./traced_timestamp";
 
@@ -22,6 +22,7 @@ export function construct_effect_propagator<A>(name: string, f: (...a: any[]) =>
                     return reactive_f(...values);
                 }),
                 filter(value => !is_no_compute(value)))
+
 
             subscribe((v: any) => {
                 output.addContent(v);

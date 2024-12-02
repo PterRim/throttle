@@ -3,9 +3,10 @@ import type { LayeredObject } from "sando-layer/Basic/LayeredObject";
 import { connect, construct_relationship, construct_effect, construct_node } from "./core";
 import { no_compute } from "./no_compute";
 import { get_base_value } from "sando-layer/Basic/Layer";
-import { compose } from "generic-handler/built_in_generics/generic_combinator";
 import { map as generic_map } from "generic-handler/built_in_generics/generic_array_operation";
-
+import { fresher, get_traced_timestamp } from "./traced_timestamp";
+import type { Effect, Node } from "./core";
+import { cell_strongest } from "ppropogator/Cell/Cell";
 // event? relationship?
 // reduce?
 // switch? until? or? and?
@@ -14,7 +15,7 @@ export const curried_generic_map  = (f: (a: any) => any) => (a: any[]) => generi
 
 export const make_operator = (name: string, f: (...a: any[]) => any) => {
     // syntax sugar
-    (...inputs: any[]) => {
+    return (...inputs: Node[]) => {
         const output = construct_node(name);
         const rf = (...a: LayeredObject[]) => f(...a.map(get_base_value));
 
@@ -22,6 +23,10 @@ export const make_operator = (name: string, f: (...a: any[]) => any) => {
         connect(inputs, output, effect);
         return [output];
     }
+}
+
+export const subscribe = (f: (a: any) => void) => (...a: Node[]) => {
+    cell_strongest(a[0]).subscribe(f);
 }
 
 export const func_e = (name: string, f: (a: any) => any) => {
@@ -55,3 +60,41 @@ export const reduce_e = (f: (a: any, b: any) => any, initial: any) => {
     });
 }
 
+
+export const until = (when: Node, then: Node) => {
+    const output = construct_node("until");
+    construct_effect("until", (w: LayeredObject, t: LayeredObject) => {
+        if (get_base_value(w) === true){
+            return t
+        }
+        else{
+            return no_compute
+        }
+    })(output, when, then);
+    return output;
+}
+
+export const or = (a: Node, b: Node) => {
+    const output = construct_node("or");
+    construct_effect("or", (a: LayeredObject, b: LayeredObject) => {
+        if (fresher(a, b)){
+            return a;
+        }
+        else if (fresher(b, a)){
+            return b;
+        }
+        else{
+            return a
+        }
+    })(output, a, b);
+    return output;
+}
+
+export const bind = (rA: Effect, rB: Effect) => {
+    return (a: Node, b: Node) => {
+        return construct_relationship("bind", () => {
+            rA(a, b);
+            rB(b, a);
+        });
+    }
+}
