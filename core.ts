@@ -17,7 +17,7 @@ export function construct_node(name: string){
     return construct_cell(name + new_reference_name());
 }
 
-export type Behavior = Effect | Relationship
+export type Connection = Effect | Relationship
 
 // effect is mono-directional , which is analogously to Event in conventional reactive system
 export type Effect = (...nodes: Node[]) => Propagator 
@@ -50,16 +50,16 @@ export function construct_relationship(name: string, f: (...inputs: any[]) => an
 }
 
 
-export function connect(a: Node, b: Node, behavior: Behavior){
+export function connect(a: Node, b: Node, behavior: Connection){
     // the behavior is a propagator
     return behavior(a, b);
 }
 
-export function broadcast(a: Node, bs: Node[], behavior: Behavior){
+export function broadcast(a: Node, bs: Node[], behavior: Connection){
     return bs.map(b => connect(a, b, behavior));
 } 
 
-export function combine(as: Node[], b: Node, behavior: Behavior){
+export function combine(as: Node[], b: Node, behavior: Connection){
     return as.map(a => connect(a, b, behavior));
 }
 

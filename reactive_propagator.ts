@@ -32,22 +32,3 @@ export function construct_effect_propagator<A>(name: string, f: (...a: any[]) =>
         })
     }
 }
-
-// export function construct_signal_propagator(name: string, f: (base: any, timestamp: number) => any){
-//     return (input: Cell, output: Cell) => {
-//         const input_reactor = cell_strongest(input);
-//         const reactive_f = (o: LayeredObject) => signal_procedure(o, f);
-
-//         return construct_propagator(name, [input], [output], () => {
-//             const activator = pipe(input_reactor,
-//                 map(reactive_f),
-//                 filter(value => !is_no_compute(value)))
-
-//             subscribe((v: any) => {
-//                 output.addContent(v);
-//             })(activator);
-
-//             return activator;
-//         })
-//     }
-// }
