@@ -9,8 +9,9 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
+    "fp-ts": "^2.16.9",
     "generic-handler": "^0.3.13",
-    "ppropagator": "0.3.1",
+    "ppropogator": "0.3.1",
     "sando-layer": "^0.1.6"
   }
 }
