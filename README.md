@@ -1,5 +1,8 @@
 # throttle
 
+a simple reactive system built on top of ppropagator supports mono-directional subscription
+
+
 To install dependencies:
 
 ```bash

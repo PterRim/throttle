@@ -7,6 +7,7 @@ import { map as generic_map } from "generic-handler/built_in_generics/generic_ar
 import { fresher, get_traced_timestamp } from "./traced_timestamp";
 import type { Effect, Node } from "./core";
 import { cell_strongest } from "ppropogator/Cell/Cell";
+import { compose } from "generic-handler/built_in_generics/generic_combinator";
 // event? relationship?
 // reduce?
 // switch? until? or? and?
@@ -26,7 +27,7 @@ export const make_operator = (name: string, f: (a: LayeredObject) => any) => {
 }
 
 export const subscribe = (f: (a: any) => void) => (a: Node) => {
-    cell_strongest(a).subscribe(f);
+    cell_strongest(a).subscribe(compose(get_base_value, f));
 }
 
 export const func_e = (name: string, f: (a: any) => any) => {
