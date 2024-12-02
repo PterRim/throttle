@@ -13,20 +13,20 @@ import { cell_strongest } from "ppropogator/Cell/Cell";
 
 export const curried_generic_map  = (f: (a: any) => any) => (a: any[]) => generic_map(a, f);
 
-export const make_operator = (name: string, f: (...a: any[]) => any) => {
+export const make_operator = (name: string, f: (a: LayeredObject) => any) => {
     // syntax sugar
-    return (...inputs: Node[]) => {
+    return (input: Node) => {
         const output = construct_node(name);
-        const rf = (...a: LayeredObject[]) => f(...a.map(get_base_value));
+        const rf = (a: LayeredObject) => f(get_base_value(a));
 
         const effect = construct_effect(name, rf)
-        connect(inputs, output, effect);
-        return [output];
+        connect(input, output, effect);
+        return output;
     }
 }
 
-export const subscribe = (f: (a: any) => void) => (...a: Node[]) => {
-    cell_strongest(a[0]).subscribe(f);
+export const subscribe = (f: (a: any) => void) => (a: Node) => {
+    cell_strongest(a).subscribe(f);
 }
 
 export const func_e = (name: string, f: (a: any) => any) => {

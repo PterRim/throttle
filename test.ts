@@ -16,7 +16,7 @@ const add_one = map_e((a: any) => a + 1);
 
 const log_result = subscribe((a: any) => console.log(a));
 
-const result = until(b, a);
+const result = until(b,  pipe(a, add_one, add_one) );
 log_result(result);
 
 update(a, 1);

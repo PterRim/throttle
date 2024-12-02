@@ -50,17 +50,17 @@ export function construct_relationship(name: string, f: (...a: any[]) => any): R
 }
 
 
-export function connect(a: Node[], b: Node, behavior: Behavior){
+export function connect(a: Node, b: Node, behavior: Behavior){
     // the behavior is a propagator
-    return behavior(b, ...a);
+    return behavior(b, a);
 }
 
 export function broadcast(a: Node, bs: Node[], behavior: Behavior){
-    return bs.map(b => connect([a], b, behavior));
+    return bs.map(b => connect(a, b, behavior));
 } 
 
 export function combine(as: Node[], b: Node, behavior: Behavior){
-    return as.map(a => connect([a], b, behavior));
+    return as.map(a => connect(a, b, behavior));
 }
 
 
