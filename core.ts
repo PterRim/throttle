@@ -40,7 +40,7 @@ function update(a: Signal, v: any){
     // refresh the old dependencies
     stale(cell_strongest_value(a))
     // supposely timestamp should work but javascript calculate time differently it will not work
-    add_cell_content(a, annotate_with_reference(v));
+    add_cell_content(a, annotate_now(v));
 }
 
 
@@ -64,8 +64,12 @@ update(b, 3);
 
 console.log(cell_strongest_base_value(c));
 
-update(a, 8);
-console.log(cell_strongest_base_value(c));
+setTimeout(() => {
+    update(a, 8);
+    console.log(cell_strongest_base_value(c));
+}, 1)
+
+
 
 
 // console.log(cell_strongest_base_value(c));
