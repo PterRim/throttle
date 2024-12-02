@@ -8,11 +8,11 @@ import { no_compute } from "./no_compute";
 import { randomUUIDv7 } from "bun";
 const get_new_id = reference_store()
 const get_new_relative_time = reference_store()
+
 interface traced_timestamp {
     timestamp: number;
     fresh: boolean;
 }
-
 
 
 
@@ -69,7 +69,7 @@ export const annotate_timestamp = construct_layer_ui(
     }
 );
 
-export const get_timestamp = layer_accessor(timestamp_layer);
+export const get_traced_timestamp = layer_accessor(timestamp_layer);
 
 export const annotate_now = (a: any) => annotate_timestamp(a, Date.now());
 export const annotate_with_reference = (a: any) => annotate_timestamp(a, get_new_relative_time());
@@ -77,19 +77,10 @@ export const annotate_with_reference = (a: any) => annotate_timestamp(a, get_new
 export const has_timestamp_layer = register_predicate("has_timestamp_layer", (a: any) => is_layered_object(a) && _has_timestamp_layer(a));
 
 export function fresher(a: LayeredObject, b: LayeredObject): boolean {
-    return get_timestamp(a).timestamp > get_timestamp(b).timestamp;
+    return get_traced_timestamp(a).timestamp > get_traced_timestamp(b).timestamp;
 }
 
-export function make_reactive_procedure<A>(f: (...args: any[]) => A): (...args: LayeredObject[]) => LayeredObject | string {
-    return (...args: LayeredObject[]) => {
-        if (args.every(is_fresh)){
-            const freshest_timestamp = get_timestamp(args.reduce((a, b) => fresher(a, b) ? a : b)).timestamp;
-            return annotate_timestamp(f(...args.map(get_base_value)), freshest_timestamp);
-        } else {
-            return no_compute;
-        }
-    } 
-}
+
 
 define_handler(generic_merge, all_match(has_timestamp_layer), (a: LayeredObject, b: LayeredObject) => {
     if (fresher(a, b)) {
@@ -108,6 +99,28 @@ function _stale(a: any) {
 }
 
 export const stale = make_layered_procedure("stale", 1, _stale)
+
+// export type SignalProcedure = (base: any, timestamp: number) => any;
+
+
+// export function signal_procedure(o: LayeredObject, f: (base: any, timestamp: number) => any){
+//     const traced_time_stamp = get_traced_timestamp(o);
+//     return annotate_timestamp(f(get_base_value(o), traced_time_stamp.timestamp));
+// }
+
+
+
+
+export function event_procedure<A>(f: (...args: any[]) => A): (...args: LayeredObject[]) => LayeredObject | string {
+    return (...args: LayeredObject[]) => {
+        if (args.every(is_fresh)){
+            const freshest_timestamp = get_traced_timestamp(args.reduce((a, b) => fresher(a, b) ? a : b)).timestamp;
+            return annotate_timestamp(f(...args), freshest_timestamp);
+        } else {
+            return no_compute;
+        }
+    } 
+}
 
 define_layered_procedure_handler(stale, timestamp_layer, 
     (base: any, timestamp: traced_timestamp) => {

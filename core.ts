@@ -1,42 +1,73 @@
 
 import { reference_store } from "ppropogator/Helper/Helper";
 import { add_cell_content, cell_strongest, cell_strongest_base_value, cell_strongest_value, construct_cell, type Cell } from "ppropogator/Cell/Cell";
-import { construct_propagator, primitive_propagator, type Propagator } from "ppropogator/Propagator/Propagator";
+import { compound_propagator, construct_propagator, primitive_propagator, type Propagator } from "ppropogator/Propagator/Propagator";
 import { set_immediate_execute } from "ppropogator/Shared/Reactivity/Scheduler";
 
-import { annotate_now, annotate_with_reference, make_reactive_procedure, stale } from "./traced_timestamp";
-import { set_trace_merge } from "ppropogator/Cell/Merge";
-import { combine_latest, subscribe } from "ppropogator/Shared/Reactivity/Reactor";
-import { pipe } from "fp-ts/lib/function";
-import { is_nothing } from "ppropogator/Cell/CellValue";
-import { map, filter} from "ppropogator/Shared/Reactivity/Reactor"
-import { is_no_compute } from "./no_compute";
-import { construct_reactive_propagator } from "./reactive_propagator";
+import { annotate_now, stale } from "./traced_timestamp";
 
+import { construct_effect_propagator as construct_effect_propagator  } from "./reactive_propagator";
+
+import { construct_reactor } from "ppropogator/Shared/Reactivity/Reactor";
+import type { LayeredObject } from "sando-layer/Basic/LayeredObject";
 
 const new_reference_name = reference_store();
 
 
-type Signal = Cell // or subject in other reactive system
+type Node = Cell // or signal in other reactive system
 
-function construct_node(name: string){
+export function construct_node(name: string){
     return construct_cell(name + new_reference_name());
 }
 
+export type Behavior = Effect | Relationship
 
+// effect is mono-directional , which is analogously to Event in conventional reactive system
+type Effect = (...nodes: Node[]) => Propagator 
 
-// primitive combinator mono directional
-function construct_event(name: string, f: (...a: any[]) => any){
+export function construct_effect(name: string, f: (...o: LayeredObject[]) => any): Effect{
     // operator is propagators but it returned a cell
-    return (...inputs: Cell[]) => {
-        const result = construct_cell(name + new_reference_name());
-        construct_reactive_propagator(name, f)(inputs, result);
-
-        return result;
+    return (...nodes: Node[]) => {
+        const output = nodes[0];
+        const inputs = nodes.slice(1);
+        return construct_effect_propagator(name, f)(inputs, output);
     }
 }
 
-function update(a: Signal, v: any){
+// Relationship is multi-directional, you can say it is like behavior, but it is not exactly the same
+type Relationship = (...nodes: Node[]) => Propagator
+
+export function construct_relationship(name: string, f: (...a: any[]) => any): Relationship{
+    return (...inputs: Cell[]) => {
+
+        return compound_propagator(
+            inputs, 
+            inputs, 
+            () => {
+                f(); 
+                // just for test
+                return construct_reactor();
+            }, 
+            name )
+    }
+}
+
+
+export function connect(a: Node[], b: Node, behavior: Behavior){
+    // the behavior is a propagator
+    return behavior(b, ...a);
+}
+
+export function broadcast(a: Node, bs: Node[], behavior: Behavior){
+    return bs.map(b => connect([a], b, behavior));
+} 
+
+export function combine(as: Node[], b: Node, behavior: Behavior){
+    return as.map(a => connect([a], b, behavior));
+}
+
+
+export function update(a: Node, v: any){
     // refresh the old dependencies
     stale(cell_strongest_value(a))
     // supposely timestamp should work but javascript calculate time differently it will not work
@@ -44,30 +75,29 @@ function update(a: Signal, v: any){
 }
 
 
-const _add = (a: number, b: number) => a + b;
 
-// TODO: relationship bi-directional
-const add = construct_event("add",  _add);
+export const set_immediate_execution = () => set_immediate_execute(true);
 
-set_immediate_execute(true);
+// const _add = (a: number, b: number) => a + b;
+
+// // TODO: relationship bi-directional
+// const add = construct_effect("add",  _add);
+
+// const a = construct_node("a");
+// const b = construct_node("b");
 
 
+// const c = add(a, b)
 
-const a = construct_node("a");
-const b = construct_node("b");
+// update(a, 2);
+// update(b, 3);
 
+// console.log(cell_strongest_base_value(c));
 
-const c = add(a, b)
-
-update(a, 2);
-update(b, 3);
-
-console.log(cell_strongest_base_value(c));
-
-setTimeout(() => {
-    update(a, 8);
-    console.log(cell_strongest_base_value(c));
-}, 1)
+// setTimeout(() => {
+//     update(a, 8);
+//     console.log(cell_strongest_base_value(c));
+// }, 1)
 
 
 

@@ -6,15 +6,16 @@ import { pipe } from "fp-ts/lib/function";
 import { combine_latest } from "ppropogator/Shared/Reactivity/Reactor";
 import { is_no_compute } from "./no_compute";
 import { map, filter } from "ppropogator/Shared/Reactivity/Reactor";
-import { make_reactive_procedure } from "./traced_timestamp";
+import { event_procedure } from "./traced_timestamp";
 import { get_base_value } from "sando-layer/Basic/Layer";
+import type { LayeredObject } from "sando-layer/Basic/LayeredObject";
 
-export function construct_reactive_propagator(name: string, f: (...a: any[]) => any){
+export function construct_effect_propagator<A>(name: string, f: (...a: any[]) => A){
  // a specialize propagator filter out no compute value
    return (inputs: Cell[], output: Cell) => {
 
         const inputs_reactors = inputs.map(cell => cell_strongest(cell));
-        const reactive_f = make_reactive_procedure(f);
+        const reactive_f = event_procedure(f);
 
         return construct_propagator(name, inputs, [output], () => {
             const activator = pipe(combine_latest(...inputs_reactors),
@@ -31,3 +32,22 @@ export function construct_reactive_propagator(name: string, f: (...a: any[]) => 
         })
     }
 }
+
+// export function construct_signal_propagator(name: string, f: (base: any, timestamp: number) => any){
+//     return (input: Cell, output: Cell) => {
+//         const input_reactor = cell_strongest(input);
+//         const reactive_f = (o: LayeredObject) => signal_procedure(o, f);
+
+//         return construct_propagator(name, [input], [output], () => {
+//             const activator = pipe(input_reactor,
+//                 map(reactive_f),
+//                 filter(value => !is_no_compute(value)))
+
+//             subscribe((v: any) => {
+//                 output.addContent(v);
+//             })(activator);
+
+//             return activator;
+//         })
+//     }
+// }
