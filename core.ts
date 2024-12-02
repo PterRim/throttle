@@ -3,11 +3,8 @@ import { reference_store } from "ppropogator/Helper/Helper";
 import { add_cell_content, cell_strongest, cell_strongest_base_value, cell_strongest_value, construct_cell, type Cell } from "ppropogator/Cell/Cell";
 import { compound_propagator, construct_propagator, primitive_propagator, type Propagator } from "ppropogator/Propagator/Propagator";
 import { set_immediate_execute } from "ppropogator/Shared/Reactivity/Scheduler";
-
 import { annotate_now, stale } from "./traced_timestamp";
-
 import { construct_effect_propagator as construct_effect_propagator  } from "./reactive_propagator";
-
 import { construct_reactor } from "ppropogator/Shared/Reactivity/Reactor";
 import type { LayeredObject } from "sando-layer/Basic/LayeredObject";
 

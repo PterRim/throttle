@@ -7,8 +7,7 @@ import { combine_latest } from "ppropogator/Shared/Reactivity/Reactor";
 import { is_no_compute } from "./no_compute";
 import { map, filter } from "ppropogator/Shared/Reactivity/Reactor";
 import { event_procedure } from "./traced_timestamp";
-import { get_base_value } from "sando-layer/Basic/Layer";
-import type { LayeredObject } from "sando-layer/Basic/LayeredObject";
+
 
 export function construct_effect_propagator<A>(name: string, f: (...a: any[]) => A){
  // a specialize propagator filter out no compute value
