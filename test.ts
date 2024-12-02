@@ -20,7 +20,7 @@
 // const sub_one = construct_effect("sub_one", (a: LayeredObject) =>  get_base_value(a) - 1);
 
 // const simple_constraint = construct_relationship("simple_constraint",
-//     (a: Node, b: Node) => {
+//     (a: Node<number>, b: Node<number>) => {
 //         add_one(a, b)
 //         sub_one(b, a)
 //     }

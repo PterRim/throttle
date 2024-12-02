@@ -16,7 +16,7 @@ export const curried_generic_map  = (f: (a: any) => any) => (a: any[]) => generi
 
 export const make_operator = (name: string, f: (a: LayeredObject) => any) => {
     // syntax sugar
-    return (input: Node) => {
+    return (input: Node<any>) => {
         const output = construct_node(name);
         const rf = (a: LayeredObject) => f(get_base_value(a));
 
@@ -26,7 +26,7 @@ export const make_operator = (name: string, f: (a: LayeredObject) => any) => {
     }
 }
 
-export const subscribe = (f: (a: any) => void) => (a: Node) => {
+export const subscribe = (f: (a: any) => void) => (a: Node<any>) => {
     cell_strongest(a).subscribe(compose(get_base_value, f));
 }
 
@@ -62,7 +62,7 @@ export const reduce_e = (f: (a: any, b: any) => any, initial: any) => {
 }
 
 
-export const until = (when: Node, then: Node) => {
+export const until = (when: Node<boolean>, then: Node<any>) => {
     const output = construct_node("until");
     construct_effect("until", (w: LayeredObject, t: LayeredObject) => {
         if (get_base_value(w) === true){
@@ -75,7 +75,7 @@ export const until = (when: Node, then: Node) => {
     return output;
 }
 
-export const or = (a: Node, b: Node) => {
+export const or = (a: Node<any>, b: Node<any>) => {
     const output = construct_node("or");
     construct_effect("or", (a: LayeredObject, b: LayeredObject) => {
         if (fresher(a, b)){
