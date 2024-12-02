@@ -2,15 +2,14 @@ import { all_match, register_predicate } from "generic-handler/Predicates";
 import { reference_store } from "ppropogator/Helper/Helper";
 import { get_base_value, layer_accessor, make_annotation_layer } from "sando-layer/Basic/Layer";
 import { construct_layer_ui, is_layered_object, type LayeredObject } from "sando-layer/Basic/LayeredObject";
-import { some, none } from "fp-ts/Option";
-import type { Option } from "fp-ts/Option";
 import { define_handler, generic_merge } from "ppropogator";
 import { define_layered_procedure_handler, make_layered_procedure } from "sando-layer/Basic/LayeredProcedure";
 import { no_compute } from "./no_compute";
+import { randomUUIDv7 } from "bun";
 const get_new_id = reference_store()
-
+const get_new_relative_time = reference_store()
 interface traced_timestamp {
-    id: number;
+    id: string;
     timestamp: number;
     fresh: boolean;
 }
@@ -19,7 +18,7 @@ interface traced_timestamp {
 
 
 export function construct_traced_timestamp(timestamp: number): traced_timestamp {
-    return { id: get_new_id(), timestamp, fresh: true }
+    return { id: randomUUIDv7(), timestamp, fresh: true }
 }
 
 export const timestamp_layer = make_annotation_layer("time_stamp", (get_name: () => string,
@@ -27,7 +26,7 @@ export const timestamp_layer = make_annotation_layer("time_stamp", (get_name: ()
                                                                     get_value: (object: any) => any,
                                                                     is_equal: (a: any, b: any) => boolean) => {
     function get_default_value(): traced_timestamp {
-        return { id: 0, timestamp: 0, fresh: false }
+        return { id:  randomUUIDv7(), timestamp: 0, fresh: false }
     }
 
     function get_procedure(name: string, arity: number): any | undefined {
@@ -74,6 +73,7 @@ export const annotate_timestamp = construct_layer_ui(
 export const get_timestamp = layer_accessor(timestamp_layer);
 
 export const annotate_now = (a: any) => annotate_timestamp(a, Date.now());
+export const annotate_with_reference = (a: any) => annotate_timestamp(a, get_new_relative_time());
 
 export const has_timestamp_layer = register_predicate("has_timestamp_layer", (a: any) => is_layered_object(a) && _has_timestamp_layer(a));
 
