@@ -1,6 +1,6 @@
 # throttle
 
-a simple reactive system built on top of ppropagator supports mono-directional subscription
+a simple reactive system built on top of ppropagator supports multi-directional dataflow
 
 
 To install dependencies:
